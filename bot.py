@@ -46,18 +46,32 @@ BOT_TOKEN: str = os.getenv("BOT_TOKEN", "PUT-YOUR-BOT-TOKEN-HERE")
 #   (you can get it by forwarding a message from the channel to @userinfobot)
 CHANNEL_ID_RAW: str = os.getenv("CHANNEL_ID", "@your_channel_username")
 
-# Normalize CHANNEL_ID:
-#   - Numeric ids (e.g. "-1001234567890") become int
-#   - Public channel usernames are kept as str and the leading "@" is added
-#     automatically if the user forgot it (e.g. "muviesman" -> "@muviesman")
+# Normalize CHANNEL_ID. Accepts any of:
+#   - "-1001234567890"           (private channel numeric id)  -> int
+#   - "@muviesman"               (already correct username)    -> "@muviesman"
+#   - "muviesman"                (username without @)          -> "@muviesman"
+#   - "https://t.me/muviesman"   (full link the user pasted)   -> "@muviesman"
+#   - "t.me/muviesman"           (link without scheme)         -> "@muviesman"
 def _normalize_channel_id(raw: str):
     raw = raw.strip()
+
+    # Numeric channel id (private channels)
     try:
         return int(raw)
     except ValueError:
-        if not raw.startswith("@"):
-            raw = "@" + raw
-        return raw
+        pass
+
+    # Strip common URL prefixes if the user pasted a link.
+    for prefix in ("https://", "http://"):
+        if raw.startswith(prefix):
+            raw = raw[len(prefix):]
+    if raw.startswith("t.me/"):
+        raw = raw[len("t.me/"):]
+
+    # Drop any trailing path segments (e.g. "muviesman/123")
+    raw = raw.split("/", 1)[0].lstrip("@")
+
+    return "@" + raw
 
 CHANNEL_ID = _normalize_channel_id(CHANNEL_ID_RAW)
 
@@ -198,6 +212,10 @@ async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 # ---------------------------------------------------------------------------
 async def handle_movie_code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     """Handle any non-command text message as a potential movie code."""
+    # Ignore edits, channel posts, and any update that isn't a regular text
+    # message — defensive guard against AttributeError.
+    if update.message is None or not update.message.text:
+        return
     code = update.message.text.strip()
 
     # Look up the code in the in-memory store.
