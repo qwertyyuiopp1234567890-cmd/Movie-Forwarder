@@ -46,11 +46,20 @@ BOT_TOKEN: str = os.getenv("BOT_TOKEN", "PUT-YOUR-BOT-TOKEN-HERE")
 #   (you can get it by forwarding a message from the channel to @userinfobot)
 CHANNEL_ID_RAW: str = os.getenv("CHANNEL_ID", "@your_channel_username")
 
-# Convert numeric channel ids to int automatically; keep @usernames as str.
-try:
-    CHANNEL_ID = int(CHANNEL_ID_RAW)
-except ValueError:
-    CHANNEL_ID = CHANNEL_ID_RAW
+# Normalize CHANNEL_ID:
+#   - Numeric ids (e.g. "-1001234567890") become int
+#   - Public channel usernames are kept as str and the leading "@" is added
+#     automatically if the user forgot it (e.g. "muviesman" -> "@muviesman")
+def _normalize_channel_id(raw: str):
+    raw = raw.strip()
+    try:
+        return int(raw)
+    except ValueError:
+        if not raw.startswith("@"):
+            raw = "@" + raw
+        return raw
+
+CHANNEL_ID = _normalize_channel_id(CHANNEL_ID_RAW)
 
 # Comma-separated list of admin user ids that may add new movies.
 # Example: ADMIN_IDS="123456789,987654321"
