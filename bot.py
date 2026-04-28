@@ -141,38 +141,29 @@ MOVIES: Dict[str, int] = load_movies()
 # ---------------------------------------------------------------------------
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not await check_sub(context.bot, update.effective_user.id):
-    await update.message.reply_text(
-        "Botdan foydalanish uchun kanalga qo‘shiling 👉 @MOVIESBEST11"
-    )
-    return
-    """Handle /start — greet the user and explain how the bot works."""
+        await update.message.reply_text(
+            "Botdan foydalanish uchun kanalga qo‘shiling 👉 @MOVIESBEST11"
+        )
+        return
+
     user = update.effective_user
     welcome = (
         f"Hi <b>{user.first_name}</b>! 🎬\n\n"
         "Send me a <b>movie code</b> (for example <code>101</code>) "
-        "and I'll forward the movie to you.\n\n"
-        "Available commands:\n"
-        "• /start — show this message\n"
-        "• /help  — usage instructions\n"
-        "• /list  — show all available movie codes"
+        "and I'll forward the movie to you."
     )
     await update.message.reply_text(welcome, parse_mode=ParseMode.HTML)
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
     if not await check_sub(context.bot, update.effective_user.id):
-    await update.message.reply_text(
-        "Avval kanalga qo‘shiling 👉 @MOVIESBEST11"
-    )
-    return
-    """Handle /help — short usage instructions."""
-    text = (
-        "How to use this bot:\n\n"
-        "1. Find a movie code in our list / channel.\n"
-        "2. Send the code as a plain message (e.g. <code>101</code>).\n"
-        "3. The movie will be forwarded straight to this chat."
-    )
-    await update.message.reply_text(text, parse_mode=ParseMode.HTML)
+        await update.message.reply_text(
+            "Avval kanalga qo‘shiling 👉 @MOVIESBEST11"
+        )
+        return
+
+    text = "How to use this bot..."
+    await update.message.reply_text(text)
 
 
 async def list_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
@@ -224,6 +215,11 @@ async def add_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> Non
 # Text (movie code) handler
 # ---------------------------------------------------------------------------
 async def handle_movie_code(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not await check_sub(context.bot, update.effective_user.id):
+        await update.message.reply_text(
+        "Avval kanalga qo‘shiling 👉 @MOVIESBEST11"
+    )
+    return
     """Handle any non-command text message as a potential movie code."""
     # Ignore edits, channel posts, and any update that isn't a regular text
     # message — defensive guard against AttributeError.
