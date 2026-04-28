@@ -32,7 +32,10 @@ from telegram.ext import (
     MessageHandler,
     filters,
 )
-
+CHANNEL_USERNAME = "@MOVIESBEST11"
+async def check_sub(bot, user_id):
+    member = await bot.get_chat_member(CHANNEL_USERNAME, user_id)
+    return member.status in ["member", "administrator", "creator"]
 # ---------------------------------------------------------------------------
 # Configuration
 # ---------------------------------------------------------------------------
@@ -137,6 +140,11 @@ MOVIES: Dict[str, int] = load_movies()
 # Command handlers
 # ---------------------------------------------------------------------------
 async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not await check_sub(context.bot, update.effective_user.id):
+    await update.message.reply_text(
+        "Botdan foydalanish uchun kanalga qo‘shiling 👉 @MOVIESBEST11"
+    )
+    return
     """Handle /start — greet the user and explain how the bot works."""
     user = update.effective_user
     welcome = (
@@ -152,6 +160,11 @@ async def start_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> N
 
 
 async def help_command(update: Update, context: ContextTypes.DEFAULT_TYPE) -> None:
+    if not await check_sub(context.bot, update.effective_user.id):
+    await update.message.reply_text(
+        "Avval kanalga qo‘shiling 👉 @MOVIESBEST11"
+    )
+    return
     """Handle /help — short usage instructions."""
     text = (
         "How to use this bot:\n\n"
