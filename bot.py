@@ -226,11 +226,11 @@ async def handle_movie_code(update: Update, context: ContextTypes.DEFAULT_TYPE) 
 
     # Forward the original channel message to the user.
     try:
-        await context.bot.forward_message(
-            chat_id=update.effective_chat.id,
-            from_chat_id=CHANNEL_ID,
-            message_id=message_id,
-        )
+        await context.bot.copy_message(
+    chat_id=update.effective_chat.id,
+    from_chat_id=CHANNEL_ID,
+    message_id=message_id,
+)
     except Forbidden:
         logger.error("Bot is not a member/admin of channel %s", CHANNEL_ID)
         await update.message.reply_text(
